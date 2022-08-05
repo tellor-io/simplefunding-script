@@ -34,11 +34,10 @@ autopay_contract_factory = w3.eth.contract(address=autopay_address,abi=autopay_a
 # only used for spending approval
 token_contract_factory = w3.eth.contract(address=token_address,abi=token_abi)
 
-wallet_nonce = w3.eth.get_transaction_count(wallet_address)
 gas = int(os.getenv("GAS",400000))
 gas_multiplier = int(os.getenv("GAS_MULTIPLIER", 30))
 def evm_transaction(contract_factory: Contract, func_name: str, **kwargs):
-
+    wallet_nonce = w3.eth.get_transaction_count(wallet_address)
     txn_build = contract_factory.get_function_by_name(func_name)(**kwargs).buildTransaction(dict(
                                 nonce=int(wallet_nonce),
                                 gasPrice=int(w3.eth.gas_price * gas_multiplier),
