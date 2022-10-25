@@ -47,7 +47,7 @@ autopay my-acct <chain id> fundfeed --setup-datafeed
 autopay my-acct <chain id> tip --tip-all
 ```
 
-**To approve a specific autopay spending**
+**To approve a specific amount for autopay spending**
 ```sh
 autopay my-acct <chain id> approve-autopay
 ```
