@@ -2,6 +2,17 @@
 
 Use for funding autopay through cli
 
+### Clone repo and cd
+```sh
+git clone https://github.com/tellor-io/simplefunding-script.git
+```
+```sh
+cd simplefunding-script
+```
+```sh
+mv .env.example .env
+```
+
 ### Setup
 
 ```sh
@@ -51,4 +62,15 @@ autopay my-acct <chain id> setupdatafeed
 - Also working on removing my-acct and chain id from cmd since not needed
 ```sh
 autopay my-acct <chain id> build-query
+```
+:exclamation: Need to setup wallet account using chained-accounts
+
+**To add account**
+```sh
+chained add <my-new-account-name> <private key> <chain ids>
+```
+
+**To delete account**
+```sh
+chained delete <account-name-to-delete>
 ```
