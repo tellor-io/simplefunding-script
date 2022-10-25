@@ -5,7 +5,7 @@ from dotenv import load_dotenv
 
 print(f"env loaded: {load_dotenv(find_dotenv())}")
 
-GAS = int(os.getenv("GAS",4000000))
+GAS = int(os.getenv("GAS",900000))
 GAS_MULTIPLIER = int(os.getenv("GAS_MULTIPLIER", 1))
 
 def fallback_input(_key: str):
