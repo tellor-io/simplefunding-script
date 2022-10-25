@@ -81,7 +81,7 @@ def check_allowance(w3: Web3, token_address: str, autopay_address: str, amount: 
 
     if allowance < amount:
         print("Approving token spend...")
-        return approve_transtacion(account=account, amount=amount, token_contract=token_contract)
+        return approve_transtacion(w3=w3, autopay_address=autopay_address,token_address=token_address, account=account, amount=amount, token_contract=token_contract)
     return allowance
 
 def transaction(contract:  Contract, func_name: str, w3: Web3, account: ChainedAccount, **kwargs):
