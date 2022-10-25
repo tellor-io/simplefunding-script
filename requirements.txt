@@ -1,2 +1,4 @@
 python-dotenv
 web3
+click
+chained-accounts == 0.0.1
