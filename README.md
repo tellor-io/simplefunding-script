@@ -28,7 +28,6 @@ source venv/bin/activate
 pip install -e .
 ```
 
-:exclamation: Need to setup wallet account using chained-accounts
 **To add account**
 ```sh
 chained add <my-new-account-name> <private key> <chain ids>
@@ -66,7 +65,7 @@ tip txn: 0xd4d9ab618b8589178d0fc1b932e60ee0144556b475aef4c87f7388b06002b4ba
 autopay <my-account-name> <chain id> fundfeed --setup-datafeed
 ```
 
-THen follow the prompts in the CLI...here's an example.
+Then follow the prompts in the CLI...here's an example.
 ```sh
 autopay <my-account-name> 5 fundfeed --setup-datafeed
 env loaded: True
@@ -91,7 +90,8 @@ setupDataFeed txn: 0x41299e3c6cc821f73bf8c319a0e2c12f58d7879691de304b3c2548c21f1
 ```
 
 **To fund a single existing feed**
-Please reference https://docs.tellor.io/tellor/getting-data/funding-a-feed#recurring-data-feed for info on input arguments.
+
+Please reference see the documentation on [funding-a-feed](https://docs.tellor.io/tellor/getting-data/funding-a-feed#recurring-data-feed) for info on input arguments.
 ```sh
 autopay <my-account-name> <chain id> fundfeed --fund-only
 ```
