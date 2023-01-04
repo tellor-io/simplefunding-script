@@ -71,14 +71,14 @@ THen follow the prompts in the CLI...here's an example.
 autopay <my-account-name> 5 fundfeed --setup-datafeed
 env loaded: True
 GOERLI_NODE set!
-Reward: 5000000000000000000            
+Reward: 5000000000000000000 # needs 18 decimals         
 Window: 300
 Current time: 1672859111
 Start time: 1672859111
 Interval: 3600
 Price threshold: 0
 Reward increase: 1
-Enter funding amount: 11000000000000000000
+Enter funding amount: 11 # does not need 18 decimals (is multiplied by 1e18)
 Build query data? Enter y if query data not available [y/N]: y
 Enter query type: SpotPrice
 Enter parameter types separated by space: string string
