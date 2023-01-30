@@ -24,8 +24,8 @@ class Directory:
     node: str
 
 CHAINS: dict[int, Directory] = {
-    1: Directory(network="Mainnet", autopay_address="0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7", token_address='0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0', node='MAINNET_NODE'),
-    5: Directory(network="Görli", autopay_address='0x1F033Cb8A2Df08a147BC512723fd0da3FEc5cCA7', token_address='0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2', node='GOERLI_NODE'),
-    137: Directory(network="Polygon", autopay_address='0x1775704809521D4D7ee65B6aFb93816af73476ec', token_address='0xE3322702BEdaaEd36CdDAb233360B939775ae5f1', node='POLYGON_NODE'),
-    80001: Directory(network="Mumbai", autopay_address='0x1775704809521D4D7ee65B6aFb93816af73476ec', token_address='0xce4e32fe9d894f8185271aa990d2db425df3e6be', node='MUMBAI_NODE'),
+    1: Directory(network="Mainnet", autopay_address="0x9BE9B0CFA89Ea800556C6efbA67b455D336db1D0", token_address='0x88dF592F8eb5D7Bd38bFeF7dEb0fBc02cf3778a0', node='MAINNET_NODE'),
+    5: Directory(network="Görli", autopay_address='0x9BE9B0CFA89Ea800556C6efbA67b455D336db1D0', token_address='0x51c59c6cAd28ce3693977F2feB4CfAebec30d8a2', node='GOERLI_NODE'),
+    137: Directory(network="Polygon", autopay_address='0x9BE9B0CFA89Ea800556C6efbA67b455D336db1D0', token_address='0xE3322702BEdaaEd36CdDAb233360B939775ae5f1', node='POLYGON_NODE'),
+    80001: Directory(network="Mumbai", autopay_address='0x9BE9B0CFA89Ea800556C6efbA67b455D336db1D0', token_address='0xce4e32fe9d894f8185271aa990d2db425df3e6be', node='MUMBAI_NODE'),
 }
