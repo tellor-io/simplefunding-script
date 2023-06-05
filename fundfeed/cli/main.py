@@ -6,63 +6,83 @@ from fundfeed.cli.utils import build_query_data
 from chained_accounts import find_accounts
 from chained_accounts import ChainedAccount
 from fundfeed.tip_all import one_time_tips_funding
-from fundfeed.transaction import autopay_transaction
-from fundfeed.transaction import approve_transtacion
+from fundfeed.autopay_txn import autopay_transaction
+from fundfeed.approve_txn import approve_transtacion
 from fundfeed.fund_all import fund_feed
-from fundfeed.transaction import constants
+from fundfeed.utils import web3_instance
+from fundfeed.constants import CHAINS
 from fundfeed.cli.utils import colored_style
 from fundfeed.cli.utils import colored_prompt
 
 
 @click.group()
-@click.argument('account_name', type=str)
-@click.argument('chain', type=int)
-@click.option('--query-data', '-qd', type=str, default=None)
+@click.argument("account_name", type=str)
+@click.argument("chain", type=int)
+@click.option("--query-data", "-qd", type=str, default=None)
+@click.option("-tt", "--transaction-type", type=click.Choice(["0", "2"]), default="2")
+@click.option(
+    "-amt",
+    "--amount",
+    type=float,
+    required=True,
+    confirmation_prompt=True,
+    prompt=colored_style("Enter funding amount"),
+)
 @click.pass_context
 def main(
     ctx: click.Context,
     account_name: ChainedAccount,
     chain: int,
     query_data: str,
+    transaction_type: int,
+    amount: float,
 ):
     """Fund Autopay!"""
     try:
         account = find_accounts(name=account_name)[0]
     except IndexError:
         click.echo(colored_style("No account found with that name!\n"))
-        click.echo(colored_style("Consider adding it using chained add <name> <private-key> <chain-ids> command"))
+        click.echo(
+            colored_style(
+                "Consider adding it using chained add <name> <private-key> <chain-ids> command"
+            )
+        )
         return
-
-    w3, autopay_address, token_address = constants(chain=chain)
 
     ctx.ensure_object(dict)
 
     ctx.obj["ACCOUNT"] = account
     ctx.obj["CHAIN_ID"] = chain
     ctx.obj["QUERY_DATA"] = query_data
-    ctx.obj["WEB3"] = w3
-    ctx.obj["AUTOPAY_ADDRESS"] = autopay_address
-    ctx.obj["TOKEN_ADDRESS"] = token_address
+    ctx.obj["WEB3"] = web3_instance(chain=chain)
+    ctx.obj["AUTOPAY_ADDRESS"] = CHAINS[chain].autopay_address
+    ctx.obj["TOKEN_ADDRESS"] = CHAINS[chain].token_address
+    ctx.obj["TRANSACTION_TYPE"] = int(transaction_type)
+    ctx.obj["AMOUNT"] = int(amount * 1e18)
 
 
 @main.command()
-@click.option('--amount', '-amt', type=int, required=True, prompt=colored_style("Enter tip amount"), confirmation_prompt=True)
-@click.option('--tip-all/--single-tip')
+@click.option("--tip-all/--single-tip")
 @click.pass_context
-def tip(ctx: click.Context, amount: int, tip_all: bool):
+def tip(ctx: click.Context, tip_all: bool):
     account = ctx.obj["ACCOUNT"]
     w3 = ctx.obj["WEB3"]
-    autopay_address=ctx.obj["AUTOPAY_ADDRESS"]
-    token_address=ctx.obj["TOKEN_ADDRESS"]
+    autopay_address = ctx.obj["AUTOPAY_ADDRESS"]
+    token_address = ctx.obj["TOKEN_ADDRESS"]
+    transaction_type = ctx.obj["TRANSACTION_TYPE"]
 
-    tip_amount = int(amount * 1e18)
+    tip_amount = ctx.obj["AMOUNT"]
 
     if tip_all:
-        one_time_tips_funding(w3, account, autopay_address, token_address, tip_amount)
+        one_time_tips_funding(
+            w3, account, autopay_address, token_address, transaction_type, tip_amount
+        )
     else:
-        query_data = ctx.obj['QUERY_DATA']
+        query_data = ctx.obj["QUERY_DATA"]
         if query_data is None:
-            choice = click.confirm(colored_style("Build query data? Enter y if query data not available"))
+            choice = click.confirm(
+                colored_style("Build query data? Enter y if query data not available")
+            )
             if not choice:
                 query_data = colored_prompt("Enter query data", str)
             else:
@@ -74,74 +94,91 @@ def tip(ctx: click.Context, amount: int, tip_all: bool):
             autopay_address=autopay_address,
             token_address=token_address,
             account=account,
+            transaction_type=transaction_type,
             func_name="tip",
             _queryId=query_id,
             _queryData=query_data,
-            _amount=tip_amount
+            _amount=tip_amount,
         )
 
 
 @main.command()
-@click.option('--setup-datafeed/--fund-only')
-@click.option('--reward', '-rwd', cls=RequiredIf, required_if='setup_datafeed', type=int)
-@click.option('--window', '-win', cls=RequiredIf, required_if='setup_datafeed', type=int)
-@click.option('--start-time', '-st', cls=RequiredIf, required_if='setup_datafeed', type=int)
-@click.option('--interval', cls=RequiredIf, required_if='setup_datafeed', type=int)
-@click.option('--price-threshold', '-pt', cls=RequiredIf, required_if='setup_datafeed', type=int)
-@click.option('--reward-increase', '-ri', cls=RequiredIf, required_if='setup_datafeed', type=int)
-@click.option('--feed-id', cls=RequiredIf, required_if='fund_only', type=str)
-@click.option('--amount', '-amt', required=True, type=int, prompt=colored_style("Enter funding amount"))
+@click.option("--setup-datafeed/--fund-only")
+@click.option(
+    "--reward", "-rwd", cls=RequiredIf, required_if="setup_datafeed", type=float
+)
+@click.option(
+    "--window", "-win", cls=RequiredIf, required_if="setup_datafeed", type=int
+)
+@click.option(
+    "--start-time", "-st", cls=RequiredIf, required_if="setup_datafeed", type=int
+)
+@click.option("--interval", cls=RequiredIf, required_if="setup_datafeed", type=int)
+@click.option(
+    "--price-threshold", "-pt", cls=RequiredIf, required_if="setup_datafeed", type=float
+)
+@click.option(
+    "--reward-increase", "-ri", cls=RequiredIf, required_if="setup_datafeed", type=float
+)
+@click.option("--feed-id", cls=RequiredIf, required_if="fund_only", type=str)
 @click.pass_context
 def fundfeed(
     ctx: click.Context,
     setup_datafeed: bool,
-    reward: int,
+    reward: float,
     window: int,
     start_time: int,
     interval: int,
-    price_threshold: int,
+    price_threshold: float,
     reward_increase: int,
     feed_id: str,
-    amount: int
 ):
 
     query_data = ctx.obj["QUERY_DATA"]
     account = ctx.obj["ACCOUNT"]
-    chain = ctx.obj["CHAIN_ID"]
     w3 = ctx.obj["WEB3"]
-    autopay_address=ctx.obj["AUTOPAY_ADDRESS"]
-    token_address=ctx.obj["TOKEN_ADDRESS"]
-
+    autopay_address = ctx.obj["AUTOPAY_ADDRESS"]
+    token_address = ctx.obj["TOKEN_ADDRESS"]
+    amount = ctx.obj["AMOUNT"]
+    transaction_type = ctx.obj["TRANSACTION_TYPE"]
+    # input float percentage and convert to what autopay expects
+    # ie 100 = 1%
+    price_threshold = int(price_threshold * 10000)
     if setup_datafeed:
         if query_data is None:
-            choice = click.confirm(colored_style("Build query data? Enter y if query data not available"))
+            choice = click.confirm(
+                colored_style("Build query data? Enter y if query data not available")
+            )
             if not choice:
                 query_data = colored_prompt("Enter query data", str)
             else:
                 query_data = build_query_data()
         setup_kwargs = {
             "_queryId": encode_hex(keccak(hexstr=query_data)),
-            "_reward": reward,
+            "_reward": int(reward * 1e18),
             "_startTime": start_time,
             "_interval": interval,
             "_window": window,
             "_priceThreshold": price_threshold,
-            "_rewardIncreasePerSecond": reward_increase,
+            "_rewardIncreasePerSecond": int(reward_increase * 1e18),
             "_queryData": query_data,
-            "_amount": int(amount*1e18)
+            "_amount": amount,
         }
         autopay_transaction(
             w3=w3,
             autopay_address=autopay_address,
             token_address=token_address,
             account=account,
+            transaction_type=transaction_type,
             func_name="setupDataFeed",
             **setup_kwargs,
         )
 
     if not setup_datafeed:
         if query_data is None:
-            choice = click.confirm(colored_style("Build query data? Enter y if query id not available"))
+            choice = click.confirm(
+                colored_style("Build query data? Enter y if query id not available")
+            )
             if not choice:
                 query_id = colored_prompt("Enter query id", str)
             else:
@@ -149,43 +186,49 @@ def fundfeed(
                 query_id = encode_hex(keccak(hexstr=query_data))
         else:
             query_id = encode_hex(keccak(hexstr=query_data))
-        
+
         autopay_transaction(
             w3=w3,
             autopay_address=autopay_address,
             token_address=token_address,
             account=account,
+            transaction_type=transaction_type,
             func_name="fundFeed",
             _feedId=feed_id,
             _queryId=query_id,
-            _amount=int(amount*1e18),
+            _amount=amount,
         )
 
 
 @main.command()
-@click.option('--amount', '-amt', required=True, type=int, prompt=colored_style("Enter funding amount"))
 @click.pass_context
-def setupdatafeed(ctx: click.Context, amount):
+def setupdatafeed(ctx: click.Context):
     account = ctx.obj["ACCOUNT"]
     chain = ctx.obj["CHAIN_ID"]
-    fund_feed(account=account, chain=chain, amount=int(amount * 1e18))
+    fund_feed(
+        account=account,
+        chain=chain,
+        amount=ctx.obj["AMOUNT"],
+        transaction_type=ctx.obj["TRANSACTION_TYPE"],
+    )
 
 
 @main.command()
-@click.option('--amount', '-amt', required=True, type=int, prompt=colored_style("Enter approve amount"))
 @click.pass_context
-def approve_autopay(ctx: click.Context, amount: int):
+def approve_autopay(ctx: click.Context):
     account = ctx.obj["ACCOUNT"]
-    w3=ctx.obj["WEB3"]
-    autopay_address=ctx.obj["AUTOPAY_ADDRESS"]
-    token_address=ctx.obj["TOKEN_ADDRESS"]
+    w3 = ctx.obj["WEB3"]
+    autopay_address = ctx.obj["AUTOPAY_ADDRESS"]
+    token_address = ctx.obj["TOKEN_ADDRESS"]
     approve_transtacion(
         w3=w3,
         autopay_address=autopay_address,
         token_address=token_address,
         account=account,
-        amount=int(amount * 1e18)
+        transaction_type=ctx.obj["TRANSACTION_TYPE"],
+        amount=ctx.obj["AMOUNT"],
     )
+
 
 @main.command()
 def build_query():
