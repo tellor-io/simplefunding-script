@@ -10,8 +10,8 @@ from fundfeed.constants import CHAINS
 def fallback_input(_key: str):
     """Prompt input if no .env setup"""
     val = os.getenv(_key, None)
-    if not val:
-        return input(f"Enter {_key}:\n")
+    if not val or val.endswith("{YOUR_INFURA_KEY}"):
+        return input(f"Enter {_key} URL:\n")
     print(f"{_key} set!")
     return val
 
