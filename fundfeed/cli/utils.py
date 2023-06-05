@@ -6,40 +6,53 @@ from eth_abi import encode_abi
 
 class RequiredIf(click.Option):
     def __init__(self, *args, **kwargs):
-        self.required_if = kwargs.pop('required_if')
+        self.required_if = kwargs.pop("required_if")
         assert self.required_if, "'required_if' parameter required"
-        kwargs['help'] = (kwargs.get('help', '') +
-            ' NOTE: This argument is mutually exclusive with %s' %
-            self.required_if
+        kwargs["help"] = (
+            kwargs.get("help", "")
+            + " NOTE: This argument is mutually exclusive with %s" % self.required_if
         ).strip()
         super(RequiredIf, self).__init__(*args, **kwargs)
 
     def handle_parse_result(self, ctx, opts, args):
         flag_present = self.name in opts
         requirement_present = self.required_if in opts
-        
-        if not requirement_present and self.required_if != 'fund_only':
+
+        if not requirement_present and self.required_if != "fund_only":
             raise click.UsageError(
                 "Choose either --fund-only(feed id required) flag or --setup-datafeed flag"
             )
 
-        if not requirement_present or not opts['setup_datafeed']:
+        if not requirement_present or not opts["setup_datafeed"]:
             self.prompt = None
         else:
-            if self.name == 'start_time':
+            if self.name == "start_time":
                 click.echo(click.style(f"Current time: {int(time.time())}", fg=126))
-            self.prompt = click.style(self.name.capitalize().replace("_", " "), fg=126)
+            if self.name == "price_threshold":
+                self.prompt = self.prompt = click.style(
+                    self.name.capitalize().replace("_", " ")
+                    + " (hint: enter 0.01 for 1% price change)",
+                    fg=126,
+                )
+            elif self.name == "reward_increase":
+                self.prompt = click.style(
+                    self.name.capitalize().replace("_", " ")
+                    + " (hint: 0 for flat reward)",
+                    fg=126,
+                )
+            else:
+                self.prompt = click.style(
+                    self.name.capitalize().replace("_", " "), fg=126
+                )
 
-        if self.required_if == 'fund_only' and not opts['setup_datafeed']:
+        if self.required_if == "fund_only" and not opts["setup_datafeed"]:
             self.prompt = "Feed id"
         if not requirement_present and flag_present:
             requirement = self.required_if.replace("_", "-")
-            raise click.UsageError(
-                    f"Please use flag --{requirement}"
-                )
+            raise click.UsageError(f"Please use flag --{requirement}")
 
-        return super(RequiredIf, self).handle_parse_result(
-            ctx, opts, args)
+        return super(RequiredIf, self).handle_parse_result(ctx, opts, args)
+
 
 def build_query_data():
     query_type = colored_prompt("Enter query type", str)
@@ -47,14 +60,16 @@ def build_query_data():
     params = colored_prompt("Enter parameters separated by space", str.split)
 
     for param_typ in param_types:
-        if param_typ.startswith('uint'):
+        if param_typ.startswith("uint"):
             index = param_types.index(param_typ)
             params[index] = int(params[index])
     paramaters = encode_abi(param_types, params)
     return encode_hex(encode_abi(["string", "bytes"], [query_type, paramaters]))
 
+
 def colored_style(text):
     return click.style(text, fg=[69, 222, 187])
+
 
 def colored_prompt(text, type):
     return click.prompt(colored_style(text), type=type)
