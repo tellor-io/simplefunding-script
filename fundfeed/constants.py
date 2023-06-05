@@ -6,9 +6,6 @@ from eth_utils import to_checksum_address
 
 print(f"env loaded: {load_dotenv(find_dotenv())}")
 
-GAS = os.getenv("GAS")
-GAS_MULTIPLIER = int(os.getenv("GAS_MULTIPLIER", 1))
-
 
 @dataclass
 class Directory:

@@ -55,7 +55,7 @@ def transaction(
             transaction_success = True
         except ValueError as e:
             if "replacement transaction underpriced" in str(e):
-                GAS_MULTIPLIER += 1
+                gas_multiplier += 1
                 continue
             elif "nonce too low" in str(e):
                 continue
