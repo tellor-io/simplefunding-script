@@ -45,9 +45,9 @@ autopay <my-account-name> <chain id> tip
 Then follow the prompts in the CLI...here's an example.
 ```sh
 env loaded: True
-GOERLI_NODE set!
-Enter tip amount: 2
+Enter funding amount: 2
 Repeat for confirmation: 2
+GOERLI_NODE set!
 Build query data? Enter y if query data not available [y/N]: y
 Enter query type: SpotPrice
 Enter parameter types separated by space: string string
@@ -69,15 +69,16 @@ Then follow the prompts in the CLI...here's an example.
 ```sh
 autopay <my-account-name> 5 fundfeed --setup-datafeed
 env loaded: True
+Enter funding amount: 11
+Repeat for confirmation: 11
 GOERLI_NODE set!
-Reward: 5000000000000000000 # needs 18 decimals         
+Reward: 5
 Window: 300
 Current time: 1672859111
 Start time: 1672859111
 Interval: 3600
-Price threshold: 0
-Reward increase: 1
-Enter funding amount: 11 # does not need 18 decimals (is multiplied by 1e18)
+Price threshold (hint: enter 0.01 for 1% price change): 0.01
+Reward increase (hint: 0 for flat reward): 1
 Build query data? Enter y if query data not available [y/N]: y
 Enter query type: SpotPrice
 Enter parameter types separated by space: string string
@@ -108,15 +109,9 @@ autopay <my-account-name> <chain id> approve-autopay
 autopay <my-account-name> <chain id> tip --tip-all
 ```
 
-### In development
-
-```sh
-autopay <my-account-name> <chain id> setupdatafeed
-```
 
 **Build query data for ease access**
 - Note: doesn't handle all cases right now only uint and string
-- Also working on removing my-acct and chain id from cmd since not needed
 ```sh
 autopay <my-account-name> <chain id> build-query
 ```
