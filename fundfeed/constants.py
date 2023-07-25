@@ -98,4 +98,10 @@ CHAINS: dict[int, Directory] = {
         token_address="0x045CE60839d108B43dF9e703d4b25402a6a28a0d",
         node="FILECOIN_HYPERSPACE_NODE",
     ),
+    314159: Directory(
+        network="Calibration",
+        autopay_address="0x60cBf3991F05a0671250e673Aa166e9D1A0C662E",
+        token_address="0x15e6Cc0D69A162151Cadfba035aa10b82b12b970",
+        node="FILECOIN_CALIBRATION_NODE",
+    )
 }
